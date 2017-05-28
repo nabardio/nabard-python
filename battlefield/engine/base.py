@@ -2,9 +2,11 @@
 import json
 import socket
 import sys
+import multiprocessing as mp
 
 import pika
 
+from battlefield.engine.robot import Robot
 from .config import Config
 
 
@@ -19,10 +21,12 @@ class Engine(object):
     def __init__(self, robot1, robot2):
         self.conf = Config(Engine.PREFIX)
 
-        self.robot1 = robot1
-        self.robot2 = robot2
-        self.sock1, self.robot1.sock = socket.socketpair()
-        self.sock2, self.robot2.sock = socket.socketpair()
+        self.robot1 = Robot(robot1.name())
+        self.robot2 = Robot(robot2.name())
+        self.robot1.sock, robot1.sock = socket.socketpair()
+        self.robot2.sock, robot2.sock = socket.socketpair()
+        self.robot1.proc = mp.Process(target=robot1.run)
+        self.robot2.proc = mp.Process(target=robot2.run)
 
         try:
             self._mq_connection = pika.SelectConnection(
@@ -67,4 +71,6 @@ class Engine(object):
         """
             Runs the engine
         """
+        self.robot1.proc.start()
+        self.robot2.proc.start()
         self._mq_connection.ioloop.start()
