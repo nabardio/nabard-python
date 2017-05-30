@@ -17,7 +17,8 @@ class Config(object):
         )
         for key in os.environ:
             if key.startswith(prefix + '_'):
-                self.__conf[key] = os.environ[key]
+
+                self.__conf['_'.join(key.split('_')[1:])] = os.environ[key]
                 os.environ.unsetenv(key)
 
     def __getattr__(self, item):

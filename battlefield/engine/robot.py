@@ -7,3 +7,6 @@ class Robot(object):
         self.score = 0
         self.sock = None
         self.proc = None
+
+    def update_score(self, new_score):
+        self.score = new_score

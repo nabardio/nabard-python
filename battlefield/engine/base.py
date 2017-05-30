@@ -21,15 +21,10 @@ class Engine(object):
     def __init__(self, robot1, robot2):
         self.conf = Config(Engine.PREFIX)
 
-        self.robot1 = Robot(robot1.name())
-        self.robot2 = Robot(robot2.name())
-        self.robot1.sock, robot1.sock = socket.socketpair()
-        self.robot2.sock, robot2.sock = socket.socketpair()
-        self.robot1.proc = mp.Process(target=robot1.run)
-        self.robot2.proc = mp.Process(target=robot2.run)
+        print(self.conf.__dict__)
 
         try:
-            self._mq_connection = pika.SelectConnection(
+            self._mq_connection = pika.BlockingConnection(
                 pika.ConnectionParameters(
                     host=self.conf.MQ_HOST,
                     virtual_host=self.conf.MQ_VHOST,
@@ -38,19 +33,21 @@ class Engine(object):
                         password=self.conf.MQ_PASSWORD
                     )
                 ),
-                on_open_callback=self._on_connection_open,
             )
         except Exception as e:
-            print(e)
+            raise e
             sys.exit(1)
 
-    def _on_connection_open(self, connection):
-        self._mq_channel = connection.channel(self._on_channel_open)
+        self._mq_channel = self._mq_connection.channel()
+        self._mq_channel.basic_qos(prefetch_count=1)
+        self._mq_channel.queue_declare(queue=self.name(), auto_delete=True)
 
-    def _on_channel_open(self, channel):
-        self._mq_channel = channel
-        channel.basic_qos(prefetch_count=1)
-        channel.queue_declare(queue=self.name(), auto_delete=True)
+        self.robot1 = Robot(robot1.name())
+        self.robot2 = Robot(robot2.name())
+        self.robot1.sock, robot1.sock = socket.socketpair()
+        self.robot2.sock, robot2.sock = socket.socketpair()
+        self.robot1.proc = mp.Process(target=robot1.run)
+        self.robot2.proc = mp.Process(target=robot2.run)
 
     @classmethod
     def name(cls):
@@ -73,4 +70,3 @@ class Engine(object):
         """
         self.robot1.proc.start()
         self.robot2.proc.start()
-        self._mq_connection.ioloop.start()

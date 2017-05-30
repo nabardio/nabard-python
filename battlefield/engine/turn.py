@@ -28,14 +28,14 @@ class TurnEngine(Engine):
         for i in range(1, self.turns + 1):
             for robot in (self.robot1, self.robot2):
                 data = self.pre_step(robot)
-                self.send(b'[ENGINE] ' + data)
+                self.send('[ENGINE] ' + data)
                 robot.sock.send(data.encode())
                 try:
                     response = robot.sock.recv(1048576).decode()  # 1 KiB
-                    self.send(b'[ROBOT] ' + response)
+                    self.send('[ROBOT] ' + response)
                     self.post_step(robot, response)
                 except socket.timeout:
                     robot.sock.send(b'TIMEOUT')
 
         result = self.end()
-        self.send(b'[ENGINE] ' + result)
+        self.send('[ENGINE] ' + result)
