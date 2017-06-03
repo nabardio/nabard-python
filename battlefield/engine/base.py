@@ -1,72 +1,72 @@
 # -*- coding: utf-8 -*-
 import json
-import socket
-import sys
 import multiprocessing as mp
+import socket
+import atexit
 
 import pika
 
-from battlefield.engine.robot import Robot
-from .config import Config
+from . import Robot, Config
 
 
 class Engine(object):
     """
     Engine is the base class of a game engine that creates a connection to a
-    rabbitMQ and is able to send message to a queue.
+    rabbitMQ and is able to send message to a queue and also create the 
+    robots processes and starts them on running the engine.
     """
 
     PREFIX = 'BATTLEFIELD'
 
-    def __init__(self, robot1, robot2):
+    def __init__(self, *args):
         self.conf = Config(Engine.PREFIX)
 
-        print(self.conf.__dict__)
-
-        try:
-            self._mq_connection = pika.BlockingConnection(
-                pika.ConnectionParameters(
-                    host=self.conf.MQ_HOST,
-                    virtual_host=self.conf.MQ_VHOST,
-                    credentials=pika.PlainCredentials(
-                        username=self.conf.MQ_USERNAME,
-                        password=self.conf.MQ_PASSWORD
-                    )
-                ),
-            )
-        except Exception as e:
-            raise e
-            sys.exit(1)
+        self._mq_connection = pika.BlockingConnection(
+            pika.ConnectionParameters(
+                host=self.conf.MQ_HOST,
+                virtual_host=self.conf.MQ_VHOST,
+                credentials=pika.PlainCredentials(
+                    username=self.conf.MQ_USERNAME,
+                    password=self.conf.MQ_PASSWORD
+                )
+            ),
+        )
 
         self._mq_channel = self._mq_connection.channel()
         self._mq_channel.basic_qos(prefetch_count=1)
-        self._mq_channel.queue_declare(queue=self.name(), auto_delete=True)
+        self._mq_channel.queue_declare(queue=self.conf.MQ_QUEUE)
 
-        self.robot1 = Robot(robot1.name())
-        self.robot2 = Robot(robot2.name())
-        self.robot1.sock, robot1.sock = socket.socketpair()
-        self.robot2.sock, robot2.sock = socket.socketpair()
-        self.robot1.proc = mp.Process(target=robot1.run)
-        self.robot2.proc = mp.Process(target=robot2.run)
+        self.robots = []
+        for item in args:
+            robot = Robot(item.name())
+            robot.sock, item.sock = socket.socketpair()
+            robot.process = mp.Process(target=item.run)
+            robot.process.daemon = True
+            self.robots.append(robot)
 
     @classmethod
     def name(cls):
         """
-        Name the class that is calling this method
+        Name of the subclass of this class.
         """
         return cls.__name__
 
     def send(self, message):
         """
-            sends a message to the queue
+            sends a message to the queue.
         """
         self._mq_channel.basic_publish(exchange='',
-                                       routing_key=self.name(),
+                                       routing_key=self.conf.MQ_QUEUE,
                                        body=json.dumps(message))
 
     def run(self):
         """
-            Runs the engine
+        Runs the engine and also starts the robots processes.
         """
-        self.robot1.proc.start()
-        self.robot2.proc.start()
+        atexit.register(self._cleanup)
+        for robot in self.robots:
+            robot.process.start()
+
+    def _cleanup(self):
+        for robot in self.robots:
+            robot.process.terminate()

@@ -4,8 +4,11 @@ import os
 
 class Config(object):
     """
-        A basic configuration class containing required values that can be
-        extended and override the default configurations.
+    A basic configuration class reading from environment containing required 
+    values that can be extended and override the default configurations.
+    
+    Note::
+        It removes each key/value it reads.
     """
 
     def __init__(self, prefix):

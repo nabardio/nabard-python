@@ -2,11 +2,14 @@
 
 
 class Robot(object):
+    """
+    Robot is a simple class for the game engine to avoid using the original 
+    robot class. it handles the the robot process, score, and socket to the 
+    process.
+    """
+
     def __init__(self, name):
         self.name = name
         self.score = 0
         self.sock = None
-        self.proc = None
-
-    def update_score(self, new_score):
-        self.score = new_score
+        self.process = None

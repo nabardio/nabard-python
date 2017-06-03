@@ -1,9 +1,5 @@
-"""
-    .__init__.py
-    ~~~~~~
-    
-    This module
-    
-    :copyright: (c) 2017 by Mehdy Khoshnoody.
-    :license: GPLv3, see LICENSE for more details.
-"""
+# -*- coding: utf-8 -*-
+from .config import Config
+from .robot import Robot
+from .base import Engine
+from .turn import TurnEngine

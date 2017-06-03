@@ -20,7 +20,7 @@ from battlefield.engine import TurnEngine
 
 
 class Math(TurnEngine):
-    def pre_step(self, robot):
+    def step(self, robot):
         a = random.randint(1,100)
         b = random.randint(1,100)
         op = random.choice(['+', '-', '*', '/'])
@@ -32,11 +32,17 @@ class Math(TurnEngine):
             self.answer = a * b
         elif op == '/':
             self.answer = a / b
-        return ' '.join([a, op, b])
-
-    def post_step(self, robot, resp):
+        resp = yield ' '.join([a, op, b])
         if int(resp) == self.answer:
-            robot.update_score(robot.score + 1)
+            robot.score += 1
+
+    def end(self):
+        if self.robots[0].score == self.robots[1].score:
+            return 'DRAW'
+        elif self.robots[0].score > self.robots[1].score:
+            return 'FIRST'
+        else:
+            return 'SECOND'
 ```
 This engines generate a simple math question and asks the robots to answer.
  
