@@ -2,11 +2,10 @@
 import json
 import multiprocessing as mp
 import socket
-import atexit
 
 import pika
 
-from . import Robot, Config
+from . import Config, Robot
 
 
 class Engine(object):
@@ -38,18 +37,11 @@ class Engine(object):
 
         self.robots = []
         for item in args:
-            robot = Robot(item.name())
+            robot = Robot(item.id)
             robot.sock, item.sock = socket.socketpair()
             robot.process = mp.Process(target=item.run)
             robot.process.daemon = True
             self.robots.append(robot)
-
-    @classmethod
-    def name(cls):
-        """
-        Name of the subclass of this class.
-        """
-        return cls.__name__
 
     def send(self, message):
         """
@@ -63,10 +55,5 @@ class Engine(object):
         """
         Runs the engine and also starts the robots processes.
         """
-        atexit.register(self._cleanup)
         for robot in self.robots:
             robot.process.start()
-
-    def _cleanup(self):
-        for robot in self.robots:
-            robot.process.terminate()

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='Battlefield',
-    version='1.0.0',
-    packages=['battlefield'],
+    version='1.0.2',
+    packages=find_packages(),
+    install_requires=['pika'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
@@ -20,5 +21,4 @@ setup(
     license='GPLv3',
     author='Mehdy Khoshnoody',
     author_email='mehdy.khoshnoody@gmail.com',
-    description='Utilities to create games and robots for Battlefield'
-)
+    description='Utilities to create games and robots for Battlefield')
