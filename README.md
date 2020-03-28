@@ -1,22 +1,29 @@
-# Battlefield
-This is a utility package that contains game and robot engines to help developers create games or robots.
+# Nabard
+
+This is a library that contains game and robot engines to help developers create games or robots for <https://nabard.io.>
 
 ## Installation
-just install it with pip
-```
-$ pip install battlefield
+
+just install it with pip or pipenv or any other package manager you're using
+
+```bash
+pip install nabard
 ```
 
 ## Usage
+
 Here's a basic example of using the library.
 
 > **Note**: the library is under heavy development and it may change a lot
 
 ### Create a game
+
+This engines generate a simple math question and asks the robots to answer.
+
 ```python
 import random
 
-from battlefield.engine import TurnEngine
+from nabard.engine import TurnEngine
 
 
 class Math(TurnEngine):
@@ -44,11 +51,13 @@ class Math(TurnEngine):
         else:
             return 'SECOND'
 ```
-This engines generate a simple math question and asks the robots to answer.
- 
+
 ### Create a robot
+
+This robot receive a question from the engine above in each step and respond to it.
+
 ```python
-from battlefield.robot import Robot
+from nabard.robot import Robot
 
 
 class MathSolver(Robot):
@@ -64,4 +73,3 @@ class MathSolver(Robot):
         elif op == '/':
             return str(a / b)
 ```
-This robot receive a question from the engine above in each step and respond to it.
