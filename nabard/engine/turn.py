@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import socket
 
 from . import Engine
@@ -6,8 +5,7 @@ from . import Engine
 
 class TurnEngine(Engine):
     """
-    TurnEngine is a simple engine based on turn. it handles the robots 
-    sequentially.
+    TurnEngine is a simple engine for turn-based games like chess.
     """
 
     turn_timeout = 1  # default timeout is 1 second
@@ -15,8 +13,8 @@ class TurnEngine(Engine):
 
     def step(self, robot):
         """
-        step must be a generator that yields the data to send to the robot. 
-        
+        step must be a generator that yields the data to send to the robot.
+
         Example::
             def step(self, robot):
                 data = get_data() #  does something to get the data
@@ -28,8 +26,7 @@ class TurnEngine(Engine):
     def end(self):
         """
         When the game is done this method is called for finishing the game.
-        calculating the scores, penalties and etc. return the status of the 
-        game.
+         Calculating the scores, penalties and etc. Return the game status.
         """
         raise NotImplementedError()
 
@@ -37,7 +34,7 @@ class TurnEngine(Engine):
         """
         Runs the engine.
         """
-        super(TurnEngine, self).run()
+        super().run()
         for robot in self.robots:
             robot.sock.settimeout(self.turn_timeout)
 
@@ -45,20 +42,20 @@ class TurnEngine(Engine):
             for robot in self.robots:
                 step = self.step(robot)
                 data = step.send(None)
-                self.send({'from': 'ENGINE', 'to': robot.id, 'step': i,
-                           'msg': data})
+                self.log({"from": "ENGINE", "to": robot.id, "step": i, "msg": data})
                 robot.sock.send(data.encode())
                 try:
                     response = robot.sock.recv(1048576).decode()  # 1 KiB
-                    self.send({'from': robot.id, 'to': 'ENGINE', 'step': i,
-                               'msg': response})
+                    self.log(
+                        {"from": robot.id, "to": "ENGINE", "step": i, "msg": response}
+                    )
                     step.send(response)
                 except socket.timeout:
-                    robot.sock.send(b'TIMEOUT')
-                    self.send({'from': 'ENGINE', 'to': robot.id, step: i,
-                               'msg': 'TIMEOUT'})
+                    robot.sock.send(b"TIMEOUT")
+                    self.send(
+                        {"from": "ENGINE", "to": robot.id, step: i, "msg": "TIMEOUT"}
+                    )
                 except StopIteration:
                     pass
 
-        self.send({'from': 'ENGINE', 'to': 'Ares', 'step': -1,
-                   'msg': self.end()})
+        self.send({"from": "ENGINE", "to": "Ares", "step": -1, "msg": self.end()})
