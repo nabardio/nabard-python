@@ -18,7 +18,7 @@ class Robot(object):
         """
         Runs the robot.
         """
-        if self.sock == None:
+        if self.sock is None:
             raise Exception("the socket has not been injected")
         while True:
             data = self.sock.recv(1048576).decode()  # 1 KiB
