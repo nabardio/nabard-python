@@ -1,8 +1,11 @@
+import os
+import random
+
 from setuptools import find_packages, setup
 
 setup(
     name="nabard",
-    version="0.1.0",
+    version=os.getenv("VERSION", f"0.0.0.dev{int(random.random() * 1000)}"),
     packages=find_packages(),
     install_requires=[],
     classifiers=[
