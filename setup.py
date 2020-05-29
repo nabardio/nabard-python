@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="nabard",
-    version=os.getenv("VERSION", f"0.0.0.dev{int(random.random() * 1000)}"),
+    version=os.getenv("VERSION", "") or f"0.0.0.dev{int(random.random() * 10000)}",
     packages=find_packages(),
     install_requires=[],
     classifiers=[
