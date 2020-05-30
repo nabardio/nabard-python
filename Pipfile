@@ -9,6 +9,9 @@ pylama = "*"
 black = "*"
 setuptools = "*"
 wheel = "*"
+pytest = "*"
+pytest-cov = "*"
+nabard = {editable = true,path = "."}
 
 [packages]
 
