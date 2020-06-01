@@ -19,6 +19,9 @@ class Engine:
             robot.process.daemon = True
             self.robots.append(robot)
 
+    def log(self, msg):
+        print(msg)
+
     def run(self):
         """
         Runs the engine and also starts the robots processes.

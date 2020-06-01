@@ -52,10 +52,10 @@ class TurnEngine(Engine):
                     step.send(response)
                 except socket.timeout:
                     robot.sock.send(b"TIMEOUT")
-                    self.send(
+                    self.log(
                         {"from": "ENGINE", "to": robot.id, step: i, "msg": "TIMEOUT"}
                     )
                 except StopIteration:
                     pass
 
-        self.send({"from": "ENGINE", "to": "Ares", "step": -1, "msg": self.end()})
+        self.log({"from": "ENGINE", "to": "Ares", "step": -1, "msg": self.end()})
